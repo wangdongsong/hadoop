@@ -1,0 +1,37 @@
+group 'com.wds'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+
+ext {
+    springVersion = '4.2.0.RELEASE'
+    log4j2Version = '2.7';
+    hadoopVersion = '2.7.2'
+
+}
+
+task createJavaProject << {
+    sourceSets*.java.srcDirs*.each { it.mkdirs() }
+    sourceSets*.resources.srcDirs*.each { it.mkdirs()}
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+task copyToLib( type: Copy ) {
+    into "$buildDir/libs/lib"
+    from configurations.runtime
+}
+
+jar { dependsOn copyToLib }
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile group: 'org.apache.hadoop', name: 'hadoop-client', version: "${hadoopVersion}"
+    compile group: 'org.apache.hadoop', name: 'hadoop-common', version: "${hadoopVersion}"
+}
