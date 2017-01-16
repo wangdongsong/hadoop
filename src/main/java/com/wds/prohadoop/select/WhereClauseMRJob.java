@@ -17,6 +17,8 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -28,6 +30,8 @@ import java.io.IOException;
  * Created by wangdongsong1229@163.com on 2017/1/7.
  */
 public class WhereClauseMRJob extends Configured implements Tool {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(WhereClauseMRJob.class);
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
@@ -62,6 +66,8 @@ public class WhereClauseMRJob extends Configured implements Tool {
 
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+
+            LOGGER.info(value.toString());
 
             if (AirlineDataUtils.isHeader(value)) {
                 return;
