@@ -67,7 +67,7 @@ public class WhereClauseMRJob extends Configured implements Tool {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
-            LOGGER.info(value.toString());
+            LOGGER.info("wds= " + value.toString());
 
             if (AirlineDataUtils.isHeader(value)) {
                 return;
