@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -22,11 +23,14 @@ import java.util.StringTokenizer;
  */
 public class WordCount {
 
+    public static Logger LOGGER = Logger.getLogger(WordCount.class);
+
     public static class WordCountMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
         private Text word = new Text();
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             StringTokenizer str = new StringTokenizer(value.toString());
+            LOGGER.info("key word = " + value.toString());
             while (str.hasMoreTokens()) {
                 word.set(str.nextToken());
                 context.write(word, new IntWritable(1));
