@@ -35,6 +35,14 @@ jar { dependsOn copyToLib }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: "${log4j2Version}"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version:"${log4j2Version}"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: "${log4j2Version}"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-jul', version: "${log4j2Version}"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: "${log4j2Version}"
+
+
     compile group: 'org.apache.hadoop', name: 'hadoop-client', version: "${hadoopVersion}"
     compile group: 'org.apache.hadoop', name: 'hadoop-common', version: "${hadoopVersion}"
 }
