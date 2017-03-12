@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d [%t] %-5level %logger{36} %L: %msg%n"/>
+        </Console>
+
+        <!--
+        <Flume name="eventLogger" compress="false">
+            <Agent host="127.0.0.1" port="8800"/>
+        </Flume>-->
+    </Appenders>
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+            <!--<AppenderRef ref="Con_JSON" />
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="eventLogger" />-->
+        </Root>
+    </Loggers>
+</Configuration>
