@@ -21,6 +21,7 @@ import org.apache.hadoop.util.ToolRunner;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -42,7 +43,7 @@ public class CommentWordCountRunner extends Configured implements Tool {
         Job job = Job.getInstance(getConf(), "StackOverflow Comment Word Count");
         job.setJarByClass(CommentWordCountRunner.class);
         job.setMapperClass(CommentWordMapper.class);
-        job.setCombinerClass(CommentWordCombiner.class);
+        job.setCombinerClass(CommentWordReducer.class);
         job.setReducerClass(CommentWordReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
@@ -92,9 +93,21 @@ public class CommentWordCountRunner extends Configured implements Tool {
         }
     }
 
-    private class CommentWordCombiner extends Reducer {
+    private class CommentWordCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {
+        //代码同Reducer相同
     }
 
-    private class CommentWordReducer extends Reducer {
+    private class CommentWordReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        private IntWritable result = new IntWritable();
+
+        @Override
+        protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum += val.get();
+            }
+            result.set(sum);
+            context.write(key, result);
+        }
     }
 }
