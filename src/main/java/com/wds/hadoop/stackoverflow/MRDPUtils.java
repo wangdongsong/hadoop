@@ -1,5 +1,6 @@
-package com.wds.hadoop.utils;
+package com.wds.hadoop.stackoverflow;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,8 +39,11 @@ public class MRDPUtils {
     public static void main(String[] args) {
         String xml = "<row Id=\"1\" PostTypeId=\"1\" CreationDate=\"2013-12-18T20:25:25.003\" Score=\"30\" ViewCount=\"9495\" Body=\"&lt;p&gt;One of the Kindle Touch &lt;a href=&quot;http://kindleworld.blogspot.com/2013/03/kindle-news-kindle-touch-update-v5321.html&quot;&gt;updates&lt;/a&gt; included a &quot;Time-to-Read&quot; feature.  It seems to be based loosely on how fast I turn the page.  I usually turn back to the cover when I start reading a new book and flip back to the start of the introduction or first chapter.  So the status usually says &lt;code&gt;1 min left in chapter&lt;/code&gt; for a chapter or two.  I'm guessing the algorithm has determined that I have super-human reading speed.  Once I prove I don't, it becomes fairly accurate.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;But other times I sit on a page for several minutes when distracted by other things.  I would have assumed the calculation would show me taking much longer to finish chapters after doing that.  However, the reading time seems to be stable and fairly accurate after the initial weirdness.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;How does the algorithm work and why does each book have its own estimate?&lt;/p&gt;&#xA;\" OwnerUserId=\"3\" LastActivityDate=\"2013-12-19T04:18:10.800\" Title=\"How does the Kindle's reading rate algorithm work?\" Tags=\"&lt;kindle&gt;&lt;time-to-read&gt;&lt;kindle-touch&gt;\" AnswerCount=\"1\" CommentCount=\"0\" FavoriteCount=\"5\" />";
         //xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-        xml = "<Post>";
-        Map map = transFormXMLToMap(xml);
+        //xml = "<Post>";
+        Map<String, String> map = transFormXMLToMap(xml);
+        //LOGGER.info(StringEscapeUtils.unescapeHtml(map.get("Body").toLowerCase()));
+        LOGGER.info(StringEscapeUtils.escapeHtml("<a>aaa</a>"));
+        LOGGER.info(StringEscapeUtils.escapeSql("<a>aaa</a>% like ? "));
         LOGGER.info(map);
         LOGGER.info(LOGGER.getClass());
     }
