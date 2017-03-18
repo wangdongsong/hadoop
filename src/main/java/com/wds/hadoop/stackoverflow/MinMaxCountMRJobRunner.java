@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ * 最小值、最大值与计数示例
+ * 问题：对于给定的一个用户评论的列表，确定每个用户第一次和最近一次评论的时间以及这个用户所有的评论数
  * Created by wangdongsong1229@163.com on 2017/3/14.
  */
 public class MinMaxCountMRJobRunner extends Configured implements Tool {
