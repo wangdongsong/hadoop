@@ -6,16 +6,19 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.protocol.datatransfer.PacketHeader;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -23,9 +26,13 @@ import java.util.StringTokenizer;
 /**
  *  针对StackOverflow的评论数据进行统计
  * <a>https://data.stackexchange.com/help</a>下载归档数据
+ * 源数据文件：Comments.xml
+ * https://github.com/wangdongsong/hadoop
  * Created by wangdongsong1229@163.com on 2017/3/13.
  */
-public class CommentWordCountRunner extends Configured implements Tool {
+public class CommentWordCountMRJobRunner extends Configured implements Tool {
+
+
 
     @Override
     public int run(String[] allArgs) throws Exception {
@@ -36,14 +43,20 @@ public class CommentWordCountRunner extends Configured implements Tool {
         }
 
         Job job = Job.getInstance(getConf(), "StackOverflow Comment Word Count");
-        job.setJarByClass(CommentWordCountRunner.class);
+        job.setJarByClass(CommentWordCountMRJobRunner.class);
+
         job.setMapperClass(CommentWordMapper.class);
-        job.setCombinerClass(CommentWordReducer.class);
+        if ("combiner".equalsIgnoreCase(args[2])){
+            job.setCombinerClass(CommentWordReducer.class);
+        }
         job.setReducerClass(CommentWordReducer.class);
+
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
+
         FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
         Path path = new Path(args[1]);
         FileSystem fs = path.getFileSystem(getConf());
         if (fs.exists(path)) {
@@ -57,7 +70,7 @@ public class CommentWordCountRunner extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
-        ToolRunner.run(new CommentWordCountRunner(), args);
+        ToolRunner.run(new CommentWordCountMRJobRunner(), args);
     }
 
     public static class CommentWordMapper extends Mapper<Object, Text, Text, IntWritable> {
@@ -71,7 +84,7 @@ public class CommentWordCountRunner extends Configured implements Tool {
             //获取评论的内容
             String txt = parsed.get("Text");
 
-            if (StringUtils.isBlank(txt.trim())) {
+            if (StringUtils.isBlank(txt)) {
                 return;
             }
 
@@ -92,7 +105,7 @@ public class CommentWordCountRunner extends Configured implements Tool {
         //代码同Reducer相同
     }
 
-    private class CommentWordReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+    public static class CommentWordReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
         private IntWritable result = new IntWritable();
 
         @Override
@@ -104,5 +117,7 @@ public class CommentWordCountRunner extends Configured implements Tool {
             result.set(sum);
             context.write(key, result);
         }
+
+
     }
 }
