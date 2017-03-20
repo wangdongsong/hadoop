@@ -18,6 +18,7 @@ import java.util.Map;
 /**
  * 平均值示例
  * 问题：给定用户的评论示例，按天计算每小时的平均评论长度
+ * 方案：按小时分组，通过自定的Writable，将“计数”和“和“一直写到Writable类中，实现平均值，此方法可以使用combiner
  * Created by wangdongsong1229@163.com on 2017/3/18.
  */
 public class AverageMRJobRunner {
