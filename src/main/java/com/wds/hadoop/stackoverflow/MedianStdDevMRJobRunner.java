@@ -1,11 +1,19 @@
 package com.wds.hadoop.stackoverflow;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.db.FloatSplitter;
+import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.http.impl.conn.Wire;
 
 import java.io.DataInput;
@@ -26,12 +34,46 @@ public class MedianStdDevMRJobRunner extends Configured implements Tool{
     private final static SimpleDateFormat frmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     @Override
-    public int run(String[] args) throws Exception {
+    public int run(String[] allArgs) throws Exception {
+        String[] args = new GenericOptionsParser(getConf(), allArgs).getRemainingArgs();
+        if (args.length < 3) {
+            System.err.println("Usage: MedianStdDevMRJobRunner <in><out><combiner>");
+            System.exit(2);
+        }
+
+        Job job = Job.getInstance(getConf(), "StackOverflow Comment Word Count");
+        job.setJarByClass(MedianStdDevMRJobRunner.class);
+
+
+        if ("combiner".equalsIgnoreCase(args[2])) {
+            job.setMapperClass(OptimzingMedianStdDevMapper.class);
+            job.setReducerClass(OptimzingMedianStdDevReducer.class);
+            job.setCombinerClass(OptimzingMedianStdDevCombiner.class);
+            job.setOutputKeyClass(IntWritable.class);
+            job.setOutputValueClass(SortedMapWritable.class);
+        } else {
+            job.setMapperClass(MedianStdDevMapper.class);
+            job.setReducerClass(MedianStdDevReducer.class);
+            job.setOutputKeyClass(IntWritable.class);
+            job.setOutputValueClass(MedianStdTuple.class);
+        }
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        Path path = new Path(args[1]);
+        FileSystem fs = path.getFileSystem(getConf());
+        if (fs.exists(path)) {
+            fs.delete(path, true);
+        }
+        job.submit();
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
         return 0;
     }
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws Exception{
+        Configuration conf = new Configuration();
+        ToolRunner.run(new MedianStdDevMRJobRunner(), args);
     }
 
     public static class MedianStdDevMapper extends Mapper<Object, Text, IntWritable, IntWritable> {
@@ -128,6 +170,9 @@ public class MedianStdDevMRJobRunner extends Configured implements Tool{
         }
     }
 
+    /**
+     * 优化的Reducer
+     */
     public static class OptimzingMedianStdDevReducer extends Reducer<IntWritable, SortedMapWritable, IntWritable, MedianStdTuple> {
         private MedianStdTuple result = new MedianStdTuple();
         private TreeMap<Integer, Long> commentLengthCounts = new TreeMap<>();
@@ -186,6 +231,28 @@ public class MedianStdDevMRJobRunner extends Configured implements Tool{
 
             result.setStdDev((float) Math.sqrt(sumOfSquares / (totalComments - 1)));
             context.write(key, result);
+        }
+    }
+
+    /**
+     * 优化使用Combiner
+     */
+    public static class OptimzingMedianStdDevCombiner extends Reducer<IntWritable, SortedMapWritable, IntWritable, SortedMapWritable> {
+        @Override
+        protected void reduce(IntWritable key, Iterable<SortedMapWritable> values, Context context) throws IOException, InterruptedException {
+            SortedMapWritable outValue = new SortedMapWritable();
+            for (SortedMapWritable v : values) {
+                for (Map.Entry<WritableComparable, Writable> entry : v.entrySet()) {
+                    LongWritable count = (LongWritable) outValue.get(entry.getKey());
+                    if (count != null) {
+                        count.set(count.get() + ((LongWritable) entry.getValue()).get());
+                        outValue.put(entry.getKey(), count);
+                    } else {
+                        outValue.put(entry.getKey(), new LongWritable(((LongWritable) entry.getValue()).get()));
+                    }
+                }
+            }
+            context.write(key, outValue);
         }
     }
 
