@@ -31,3 +31,12 @@
 
 ### 去重
 
+* UserId去重 DistinctUserMRJobRunner
+
+
+## 数据组织模式
+
+### 分层结构模式（structured to hierarchical）
+
+### 分区（partitioning）和分箱（binning）模式
+
