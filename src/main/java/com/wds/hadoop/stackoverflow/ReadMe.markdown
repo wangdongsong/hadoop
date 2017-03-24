@@ -38,5 +38,16 @@
 
 ### 分层结构模式（structured to hierarchical）
 
+* StackOverflow帖子和评论的构建 PostCommentHierachyMRJobRunner
+
 ### 分区（partitioning）和分箱（binning）模式
+
+* 按最后访问日期对用户分区 LastAccessDatePartitionerMRJobRunner
+* 分箱，按与Hadoop相关的标签分箱 BinningMRJobRunner
+
+### 全排序(total order sorting）和混排（shuffling）
+
+* 全排序 TotalOrderMRJobRunner
+
+### 数据生成模式（generating data pattern）
 
