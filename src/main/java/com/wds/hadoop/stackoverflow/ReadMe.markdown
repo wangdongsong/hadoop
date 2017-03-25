@@ -48,6 +48,13 @@
 ### 全排序(total order sorting）和混排（shuffling）
 
 * 全排序 TotalOrderMRJobRunner
+* 混排 AnonymizeMRJobRunner
 
 ### 数据生成模式（generating data pattern）
+
+## 连接模式
+
+### Reduce端连接
+
+* Reduce端连接示例 ReduceSideJonMRJobRunner
 
