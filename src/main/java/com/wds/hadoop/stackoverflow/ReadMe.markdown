@@ -80,4 +80,8 @@
  ### 折叠链
  
  * 链折叠整合 ChainFoldedMRJobRunner
+ 
+ ### 作业归并
+ 
+ * 作业归并 JobMergeMRJobRunner
 
