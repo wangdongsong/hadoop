@@ -56,5 +56,28 @@
 
 ### Reduce端连接
 
-* Reduce端连接示例 ReduceSideJonMRJobRunner
+* Reduce端连接示例 ReduceSideJoinMRJobRunner
+
+### 复制连接
+
+* 复制连接示例 ReplicatedJoinMRJobRunner
+
+### 组合连接
+
+* 组合用户评论连接 CompositeUserCommentMRJobRunner
+
+### 笛卡儿集
+
+* 评论对比 CartesianMRJobRunner
+
+## 元模式
+
+### 作业链
+ 
+ * 基本作业链 BasicJobChainMRJobRunner
+ * 并行作业链 ParallelJobChainMRJobRunner
+ 
+ ### 折叠链
+ 
+ * 链折叠整合 ChainFoldedMRJobRunner
 
