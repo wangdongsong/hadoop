@@ -16,6 +16,8 @@ import java.util.Map;
 public class MRDPUtils {
     private static final Logger LOGGER = LogManager.getLogger(MRDPUtils.class);
 
+    public static final String[] REDIS_INSTANCES = { "p0", "p1", "p2", "p3", "p4", "p6" };
+
     public static Map<String, String> transFormXMLToMap(String xml) {
         Map<String, String> map = new HashMap<>();
 
