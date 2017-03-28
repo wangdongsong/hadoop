@@ -84,4 +84,23 @@
  ### 作业归并
  
  * 作业归并 JobMergeMRJobRunner
+ 
+ ## 输入输出模式
+ 
+ ### 生成数据
+ 
+ * 生成随机的StackOverflow评论 RandomGenerationDataMRJobRunner
+ 
+ ### 外部源输出
+ 
+ * 写入Redis实例 RedisOutputMRJobRunner
+ 
+ ### 外部源输入
+ 
+ * 从Redis实例中读取 RedisInputMRJobRunner
+ 
+ ### 分区裁剪
+ 
+ * 按最后访问日期对Redis实例分区 RedisByLastAccessDataPrititionMRJobRunner
+ * 按照最后访问日期查询用户声望 RedisByLastAccessReputationMRJobRunner
 
