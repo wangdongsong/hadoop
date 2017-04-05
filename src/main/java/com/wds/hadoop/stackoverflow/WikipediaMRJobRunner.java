@@ -90,6 +90,9 @@ public class WikipediaMRJobRunner extends Configured implements Tool{
         }
     }
 
+    /**
+     * Reducer可以和Combiner共用
+     */
     public static class WikipediaReducer extends Reducer<Text, Text, Text, Text> {
         private Text result = new Text();
 
