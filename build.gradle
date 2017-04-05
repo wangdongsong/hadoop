@@ -39,7 +39,7 @@ dependencies {
 
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: "${log4j2Version}"
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version:"${log4j2Version}"
-    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: "${log4j2Version}"
+    //compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: "${log4j2Version}"
     compile group: 'org.apache.logging.log4j', name: 'log4j-jul', version: "${log4j2Version}"
     compile group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: "${log4j2Version}"
 
@@ -53,5 +53,7 @@ dependencies {
     compile group: 'org.apache.mahout', name: 'mahout-core', version: "${mahoutVersion}"
 
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
+
+    compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.4.6'
 
 }
