@@ -10,6 +10,7 @@ ext {
     springVersion = '4.2.0.RELEASE'
     log4j2Version = '2.7';
     hadoopVersion = '2.7.2'
+	mahoutVersion = '0.12.2'
 
 }
 
@@ -45,6 +46,11 @@ dependencies {
 
     compile group: 'org.apache.hadoop', name: 'hadoop-client', version: "${hadoopVersion}"
     compile group: 'org.apache.hadoop', name: 'hadoop-common', version: "${hadoopVersion}"
+	
+	compile group: 'org.apache.mahout', name: 'mahout-math', version: "${mahoutVersion}"
+	compile group: 'org.apache.mahout', name: 'mahout-hdfs', version: "${mahoutVersion}"
+    compile group: 'org.apache.mahout', name: 'mahout-integration', version: "${mahoutVersion}"
+    compile group: 'org.apache.mahout', name: 'mahout-core', version: "${mahoutVersion}"
 
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
 
