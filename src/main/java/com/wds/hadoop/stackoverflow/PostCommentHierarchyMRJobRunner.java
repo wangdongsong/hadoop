@@ -34,6 +34,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ *
+ * 在示例中，选取StackOverflow网站的帖子和评论的数据，将其分组在一起，一个典型的层次结构类似于：
+ *
+ * Posts
+ *      Post
+ *          Comment
+ *          Comment
+ *      Post
+ *          Comment
+ *          Comment
+ *
+ * 问题：给定一个帖子和评论的列表，创建一个结构化的XML层次结构，嵌套地表示帖子及其相关评论
  * Created by wangdongsong1229@163.com on 2017/3/23.
  */
 public class PostCommentHierarchyMRJobRunner extends Configured implements Tool {
