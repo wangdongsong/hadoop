@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 /**
  * Top 10
+ * 问题：给定一个用户信息的列表，输出其基于用户声望值的Top 10的用户信息
  * Created by wangdongsong1229@163.com on 2017/3/22.
  */
 public class TopTenMRJobRunner extends Configured implements Tool {
