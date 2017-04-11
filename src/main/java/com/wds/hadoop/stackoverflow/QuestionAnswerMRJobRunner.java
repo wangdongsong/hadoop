@@ -27,6 +27,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 该示例是PostCommentHierachyMRJobRunner延续，并且PostCommentHierachyMRJobRunner的输出作为本示例的输入。
+ * PostCommentHierachyMRJobRunner中已经获得与帖子相关的所有评论，本例将帖子的问题与其回复关联起来。帖子中
+ * 即包括回复，也包括问题，且这两者通过PostTypeId进行区分，因此可以通过问题中的Id以及回复中的ParentId将其组合在一起
+ *
+ * 问题：给定PostCommentHierachyMRJobRunner输出，通过自连接操作创建问题、回复及评论层次
+ *
  * PostCommentHierarchyMRJobRunner的输出结果作为本类的输入
  * Created by wangdongsong1229@163.com on 2017/3/24.
  */
@@ -41,6 +47,10 @@ public class QuestionAnswerMRJobRunner extends Configured implements Tool {
 
     }
 
+    /**
+     * 第一件事是判断该记录是问题还是回复，因为问题和回复对应不同的操作。对于问题，取其Id作为键并将其标记为问题。
+     * 对于回复，则取其ParentID作为键并标记为回复
+     */
     public static class QuestionAnswerMapper extends Mapper<Object, Text, Text, Text> {
         private DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         private Text outKey = new Text();

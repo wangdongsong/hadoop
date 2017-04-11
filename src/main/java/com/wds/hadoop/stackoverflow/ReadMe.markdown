@@ -43,7 +43,7 @@
 
 ### 分层结构模式（structured to hierarchical）
 
-* StackOverflow帖子和评论的构建 PostCommentHierachyMRJobRunner
+* StackOverflow帖子和评论的构建 PostCommentHierachyMRJobRunner&QuestionAnswerMRJobRunner
 
 ### 分区（partitioning）和分箱（binning）模式
 

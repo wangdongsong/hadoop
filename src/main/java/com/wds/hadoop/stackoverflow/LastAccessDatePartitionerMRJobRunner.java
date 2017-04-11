@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ * 问题：给定一组用户信息，按照最近访问日期中的年份信息对记录进行分区，一年对应一个分区
+ *
  * Created by wangdongsong1229@163.com on 2017/3/24.
  */
 public class LastAccessDatePartitionerMRJobRunner extends Configured implements Tool {
