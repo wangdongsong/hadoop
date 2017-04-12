@@ -21,6 +21,15 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
+ * 按最近访问时间对用户排序
+ *
+ * StackOverflow数据集中的用户数据是按账号的创建时间排序的，我们按照用户最近访问网站的时间对这些数据进行排序
+ *
+ * 在示例程序中由分析&排序两个步骤，有两级MapReduce作业。
+ *
+ * 问题：按最近访问时间对用户排序
+ *
+ *
  * Created by wangdongsong1229@163.com on 2017/3/24.
  */
 public class TotalOrderMRJobRunner extends Configured implements Tool {

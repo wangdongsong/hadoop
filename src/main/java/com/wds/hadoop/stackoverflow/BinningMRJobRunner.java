@@ -15,6 +15,13 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
+ * 分箱模式示例
+ *
+ * 按照标签将数据过滤到不同的箱子中，分离后，只需要关注特定标签的（Hadoop标签）数据。
+ *
+ * 问题：给定一组StackOverflow的帖子，按照标签（Hadoop、pig、Hive和Hbase）将帖子分别放到4个箱子中，另外为文本或标题中提及
+ * Hadoop的帖子创建一个单独的箱子
+ *
  * Created by wangdongsong1229@163.com on 2017/3/24.
  */
 public class BinningMRJobRunner extends Configured implements Tool {
@@ -66,8 +73,15 @@ public class BinningMRJobRunner extends Configured implements Tool {
             }
         }
 
+
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
+            mos = new MultipleOutputs(context);
+        }
+
+        @Override
+        protected void cleanup(Context context) throws IOException, InterruptedException {
+            //必须关闭实例，否则可能完全没有任何输出
             mos.close();
         }
     }

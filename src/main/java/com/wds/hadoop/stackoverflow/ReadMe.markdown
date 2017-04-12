@@ -1,6 +1,6 @@
 # 数据
 
-<a>https://data.stackexchange.com/help</a>下载归档数据
+<a>https://data.stackexchange.com/help</a>下载归档数据，使用评论、帖子、用户数据
 
 ## 概要模式
 
