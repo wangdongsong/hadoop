@@ -22,7 +22,7 @@ import java.util.Random;
  * 对StackOverflow的评论进行匿名化处理，示例中去除用户ID和行ID，并将日期和时间截断为只有日期并对数据混排
  *
  * 问题：给定StackOverflow评论的一个大数据集，对每条评论进行匿名化处理，包括去除记录ID和时间 ，然后在整个数据集内对记录随机混排
- * 
+ *
  * Created by wangdongsong1229@163.com on 2017/3/24.
  */
 public class AnonymizeMRJobRunner extends Configured implements Tool {
