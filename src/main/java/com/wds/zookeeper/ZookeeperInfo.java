@@ -19,6 +19,42 @@ public class ZookeeperInfo {
     private String serverId = Long.toString(new Random().nextLong());
     private ZooKeeper zooKeeper = null;
 
+    private AsyncCallback.StringCallback createParentCallBack = new AsyncCallback.StringCallback() {
+        @Override
+        public void processResult(int rc, String path, Object ctx, String name) {
+            switch (KeeperException.Code.get(rc)) {
+                case CONNECTIONLOSS:
+                    createParent(path, (byte[])ctx);
+                    break;
+                case OK:
+                    LOGGER.info( path + " Parent created");
+                    break;
+                case NODEEXISTS:
+                    LOGGER.warn("Parent already registered: " + path);
+                    break;
+                default:
+                    LOGGER.error("Something went wrong：" + KeeperException.create(KeeperException.Code.get(rc), path));
+            }
+        }
+    };
+
+    private AsyncCallback.StringCallback masterCreateCallback = new AsyncCallback.StringCallback() {
+        @Override
+        public void processResult(int rc, String path, Object ctx, String name) {
+            switch (KeeperException.Code.get(rc)) {
+                case CONNECTIONLOSS:
+                    checkMaster();
+                    return;
+                case OK:
+                    isLeader = true;
+                    break;
+                default:
+                    isLeader = false;
+            }
+            System.out.println("I'm " + (isLeader ? "" : "not ") + " ths leader");
+        }
+    };
+
     public void startZookeeper() throws IOException {
         zooKeeper = new ZooKeeper(hostProt, 150000, (event) -> {
             LOGGER.info(event.getPath());
@@ -39,22 +75,7 @@ public class ZookeeperInfo {
         isLeader = true;
     }
 
-    AsyncCallback.StringCallback masterCreateCallback = new AsyncCallback.StringCallback() {
-        @Override
-        public void processResult(int rc, String path, Object ctx, String name) {
-            switch (KeeperException.Code.get(rc)) {
-                case CONNECTIONLOSS:
-                    checkMaster();
-                    return;
-                case OK:
-                    isLeader = true;
-                    break;
-                default:
-                    isLeader = false;
-            }
-            System.out.println("I'm " + (isLeader ? "" : "not ") + " ths leader");
-        }
-    };
+
 
     public boolean checkMaster() {
         while (true) {
@@ -72,4 +93,10 @@ public class ZookeeperInfo {
             return false;
         }
     }
+
+    public void createParent(String path, byte[] data) {
+        zooKeeper.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, createParentCallBack, data);
+    }
+
+
 }
