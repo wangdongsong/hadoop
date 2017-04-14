@@ -47,7 +47,7 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
         FileInputFormat.setInputPaths(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
 
-        job.setOutputKeyClass(SecondarySortMRWritable.class);
+        job.setOutputKeyClass(SecondarySortMRPair.class);
         job.setOutputValueClass(NullWritable.class);
 
         job.setMapperClass(SecondarySortMRMapper.class);
@@ -58,7 +58,7 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
         return job.waitForCompletion(true) ? 0 : 1;
     }
 
-    private static class SecondarySortMRWritable implements Writable, WritableComparable<SecondarySortMRWritable>{
+    private static class SecondarySortMRPair implements Writable, WritableComparable<SecondarySortMRPair>{
 
         private Text yearMonth = new Text();
         private Text day = new Text();
@@ -78,13 +78,13 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
             temperature.readFields(in);
         }
 
-        public SecondarySortMRWritable(Text yearMonth, Text day, IntWritable temperature) {
+        public SecondarySortMRPair(Text yearMonth, Text day, IntWritable temperature) {
             this.yearMonth = yearMonth;
             this.day = day;
             this.temperature = temperature;
         }
 
-        public SecondarySortMRWritable() {
+        public SecondarySortMRPair() {
         }
 
         /**
@@ -93,7 +93,7 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
          * @return
          */
         @Override
-        public int compareTo(SecondarySortMRWritable o) {
+        public int compareTo(SecondarySortMRPair o) {
             int comparaeValue = this.yearMonth.compareTo(o.getYearMonth());
 
             if (comparaeValue == 0) {
@@ -139,7 +139,7 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
                 return false;
             }
 
-            SecondarySortMRWritable that = (SecondarySortMRWritable) o;
+            SecondarySortMRPair that = (SecondarySortMRPair) o;
             if (temperature != null ? !temperature.equals(that.temperature) : that.temperature != null) {
                 return false;
             }
@@ -160,7 +160,7 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("DateTemperaturePair{yearMonth=");
+            builder.append("SecondarySortMRPair{yearMonth=");
             builder.append(yearMonth);
             builder.append(", day=");
             builder.append(day);
@@ -171,16 +171,40 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
         }
     }
 
-    private static class SecondarySortMRReducer extends Reducer {
-    }
-
-    private static class SecondarySortMRMapper extends Mapper {
-    }
-
-    private class SecondarySortMRPartitioner extends Partitioner<SecondarySortMRWritable, Text> {
+    private static class SecondarySortMRReducer extends Reducer<SecondarySortMRPair, IntWritable, Text, Text> {
 
         @Override
-        public int getPartition(SecondarySortMRWritable o, Text o2, int numPartitions) {
+        protected void reduce(SecondarySortMRPair key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            StringBuilder sortList = new StringBuilder();
+            values.forEach(v -> sortList.append(v).append(","));
+            context.write(key.getYearMonth(), new Text(sortList.toString()));
+        }
+    }
+
+    private static class SecondarySortMRMapper extends Mapper<LongWritable, Text, SecondarySortMRPair, IntWritable> {
+
+        @Override
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+            String[] tokens = value.toString().split(",");
+            String yearMonth = tokens[0] + tokens[1];
+            String day = tokens[2];
+
+            int temprature = Integer.parseInt(tokens[3]);
+
+            //准备Reduce键
+            SecondarySortMRPair reduceKey = new SecondarySortMRPair();
+            reduceKey.setDay(new Text(day));
+            reduceKey.setYearMonth(new Text(yearMonth));
+            reduceKey.setTemperature(new IntWritable(temprature));
+
+            context.write(reduceKey, new IntWritable(temprature));
+        }
+    }
+
+    private class SecondarySortMRPartitioner extends Partitioner<SecondarySortMRPair, Text> {
+
+        @Override
+        public int getPartition(SecondarySortMRPair o, Text o2, int numPartitions) {
             //确保分区数非负
             return Math.abs(o.getYearMonth().hashCode() % numPartitions);
         }
@@ -189,12 +213,12 @@ public class SecondarySortMRDriver extends Configured implements Tool  {
     private class SecondarySortMrGroupingComparator extends WritableComparator {
 
         public SecondarySortMrGroupingComparator() {
-            super(SecondarySortMRWritable.class, true);
+            super(SecondarySortMRPair.class, true);
         }
 
         @Override
         public int compare(WritableComparable a, WritableComparable b) {
-            return ((SecondarySortMRWritable)a).getYearMonth().compareTo(((SecondarySortMRWritable)b).getYearMonth());
+            return ((SecondarySortMRPair)a).getYearMonth().compareTo(((SecondarySortMRPair)b).getYearMonth());
         }
     }
 }
