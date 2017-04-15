@@ -7,10 +7,12 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
 import java.awt.*;
 import java.io.*;
@@ -21,6 +23,11 @@ import java.util.zip.GZIPInputStream;
 
 
 /**
+ * 复制连接
+ *
+ * 该示例与Reduce端布隆过滤器的复制连接非常类似，通过DistributedCache推送到所有map任务中。将数据直接读入到内存中。
+ * 在map阶段就做了连接。
+ *
  * 问题：给定一个小的用户信息数据集和一个大的评论数据集，通过用户数据来丰富评论的内容
  *
  * Created by wangdongsong1229@163.com on 2017/3/26.
@@ -59,11 +66,11 @@ public class ReplicatedJoinMRJobRunner extends Configured implements Tool {
         //DistributedCache.setLocalFiles(job.getConfiguration(), args[0]);
 
 
-        return 0;
+        return job.waitForCompletion(true) ? 0 : 3;
     }
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws Exception {
+        ToolRunner.run(new ReplicatedJoinMRJobRunner(), args);
     }
 
 

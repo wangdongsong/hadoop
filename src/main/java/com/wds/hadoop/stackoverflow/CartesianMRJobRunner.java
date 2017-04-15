@@ -18,6 +18,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * 笛卡儿积示例
+ *
+ * 给定一个处理过的StackOverflow评论数据集，基于两个评论中相似的词的数目找出相似的评论树
+ *
  * Created by wangdongsong1229@163.com on 2017/3/26.
  */
 public class CartesianMRJobRunner extends Configured implements Tool {

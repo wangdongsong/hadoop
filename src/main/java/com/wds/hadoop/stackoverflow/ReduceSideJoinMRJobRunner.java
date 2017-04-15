@@ -24,7 +24,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ *
+ * 在该示例中，使用StackOverflow中的用户表和评论表作为数据输入，分别通过内连接、外连接、反连接，丰富评论中的用户信息
+ *
  * 问题：给定一个用户信息集合和一个用户评论列表，通过为每一条评论添加创建该评论的用户信息来丰富评论的内容
+ *
+ * 有两个Mapper，一个处理评论，一个处理用户个人信息数据。每个Mapper都将用户ID作为外键
+ *
+ * 本示例也提示了布隆过滤方式的优化，过滤部分mapper输出，减少到送到reducer端的数据量以减少分析的时间。
+ *
+ * 注意：布隆过滤器的误判以及它会给你的reduce端连接带来的影响。
+ *
  * Created by wangdongsong1229@163.com on 2017/3/25.
  */
 public class ReduceSideJoinMRJobRunner extends Configured implements Tool{

@@ -14,6 +14,10 @@ import javax.xml.soap.Text;
 import java.io.IOException;
 
 /**
+ * 组合链接
+ *
+ *
+ *
  * 问题：给定两个大的格式化数据集-用户信息和评论，使用用户信息数据来丰富评论信息
  *
  * Created by wangdongsong1229@163.com on 2017/3/26.
