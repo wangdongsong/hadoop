@@ -22,6 +22,10 @@ import java.util.*;
 import java.util.List;
 
 /**
+ * 生成数据模式示例
+ *
+ * 生成StackOverflow数据，使用1000个单词的列表并且只是生成随机的导语。同时我们也生成随机的分数、行ID、用户ID以及随机创建时间
+ *
  * Created by wangdongsong1229@163.com on 2017/3/27.
  */
 public class RandomGenerationDataMRJobRunner extends Configured implements Tool {

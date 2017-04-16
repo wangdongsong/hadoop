@@ -16,7 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 外部源输出示例
+ *
  * 问题：给定一组用户信息，采用并行的方式随机地将用户与声望的映射关系分布到数量可配置的Redis实例中。
+ *
  * Created by wangdongsong1229@163.com on 2017/3/27.
  */
 public class RedisOutputMRJobRunner extends Configured implements Tool {

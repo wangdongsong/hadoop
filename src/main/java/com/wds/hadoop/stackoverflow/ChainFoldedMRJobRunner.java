@@ -23,6 +23,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * 链折叠示例
  * 问题：给定一个用户帖子和用户信息的数据集，依据用户声望是高于5000还是低于5000对用户进行分箱
+ *
  * Created by wangdongsong1229@163.com on 2017/3/26.
  */
 public class ChainFoldedMRJobRunner extends Configured implements Tool {

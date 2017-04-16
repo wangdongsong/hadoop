@@ -10,6 +10,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 /**
+ *
+ * 分区裁剪
+ *
  * 按照最后访问日期对Redis实例分区
  *
  * 问题：给定一组用户数据，按照最后访问日期将用户至声望的映射关系交叉分布到6个Redis实例中

@@ -27,6 +27,17 @@ import java.util.zip.GZIPInputStream;
 
 
 /**
+ * 基本作业链
+ *
+ * 该示例的目标是输出一份用户列表，其中包含用户声望以及每个用户发表的帖子数，该目标可以通过一个单独的MapReduce作业实现
+ * ，但又想将用户分成两部分，一部分是发帖数在平均值以上的，一部分是发帖数在平均值以下的。因此需要两个作业来执行计数，另一个
+ * 作业根据用户的发帖数将用户分配到两个不同的箱中。
+ *
+ * 该示例会使用到4种模式：数值概要、计数、分箱、复制连接
+ *
+ * 问题：给定由StackOverflow帖子组成的一个数据集，每个用户按照发贴数是高于还是低于平均分帖数分类。当生成输出时，从一个独立
+ * 的数据集中获得每个用户的声望以丰富用户信息
+ *
  * Created by wangdongsong1229@163.com on 2017/3/26.
  */
 public class BasicJobChainMRJobRunner extends Configured implements Tool {

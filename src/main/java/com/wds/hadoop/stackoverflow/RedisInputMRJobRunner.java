@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 外部源输入示例
+ *
+ * 问题：给定一个CSV格式的Redis实例表，并行读取存储在配置的散列表中的所有数据
+ *
  * Created by wangdongsong1229@163.com on 2017/3/28.
  */
 public class RedisInputMRJobRunner extends Configured implements Tool {

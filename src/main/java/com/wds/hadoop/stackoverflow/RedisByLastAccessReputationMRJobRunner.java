@@ -18,6 +18,10 @@ import java.io.IOException;
 import java.util.*;
 
 /**
+ * 分区裁剪
+ *
+ * 问题：按最后访问日期查询用户声望
+ *
  * Created by wangdongsong1229@163.com on 2017/3/28.
  */
 public class RedisByLastAccessReputationMRJobRunner extends Configured implements Tool {
