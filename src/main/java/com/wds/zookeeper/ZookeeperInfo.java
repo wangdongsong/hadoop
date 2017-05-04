@@ -13,9 +13,9 @@ import java.util.Random;
  */
 public class ZookeeperInfo {
 
-    private final String hostProt = "127.0.0.1:2181";
+    private final String hostProt = "192.168.254.200:2181";
     private final static Logger LOGGER = LogManager.getLogger(ZookeeperTest.class);
-    private boolean isLeader = false;
+    public boolean isLeader = false;
     private String serverId = Long.toString(new Random().nextLong());
     private ZooKeeper zooKeeper = null;
 
@@ -51,7 +51,7 @@ public class ZookeeperInfo {
                 default:
                     isLeader = false;
             }
-            System.out.println("I'm " + (isLeader ? "" : "not ") + " ths leader");
+            System.out.println(Thread.currentThread().getName() + " -------I'm " + (isLeader ? "" : "not ") + " ths leader");
         }
     };
 
@@ -71,8 +71,15 @@ public class ZookeeperInfo {
     }
 
     public void runForMaster() throws InterruptedException {
-        zooKeeper.create("/master", serverId.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL, masterCreateCallback, null);
-        isLeader = true;
+        while (true){
+            zooKeeper.create("/master", serverId.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL, masterCreateCallback, null);
+            isLeader = true;
+            //break;
+
+            if (checkMaster()) {
+                break;
+            }
+        }
     }
 
 
@@ -96,6 +103,10 @@ public class ZookeeperInfo {
 
     public void createParent(String path, byte[] data) {
         zooKeeper.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, createParentCallBack, data);
+    }
+
+    public void stopZk() throws InterruptedException {
+        this.zooKeeper.close();
     }
 
 
