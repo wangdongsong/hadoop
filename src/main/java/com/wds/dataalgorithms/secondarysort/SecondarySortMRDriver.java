@@ -1,7 +1,6 @@
-package com.wds.dataalgorithms;
+package com.wds.dataalgorithms.secondarysort;
 
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
