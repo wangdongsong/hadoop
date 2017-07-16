@@ -50,10 +50,11 @@ dependencies {
 	compile group: 'org.apache.mahout', name: 'mahout-math', version: "${mahoutVersion}"
 	compile group: 'org.apache.mahout', name: 'mahout-hdfs', version: "${mahoutVersion}"
     compile group: 'org.apache.mahout', name: 'mahout-integration', version: "${mahoutVersion}"
-    compile group: 'org.apache.mahout', name: 'mahout-core', version: "${mahoutVersion}"
+    compile group: 'org.apache.mahout', name: 'mahout-core', version: "0.9"
+
+    compile group: 'org.apache.spark', name:'spark-core_2.11', version:'2.2.0'
 
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
-
     compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.4.6'
 
 }
