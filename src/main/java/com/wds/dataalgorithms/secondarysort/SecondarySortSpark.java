@@ -34,6 +34,7 @@ public class SecondarySortSpark {
         JavaPairRDD<String, Tuple2<Integer, Integer>> pairs = lines.mapToPair(new PairFunction<String, String, Tuple2<Integer, Integer>>() {
             @Override
             public Tuple2<String, Tuple2<Integer, Integer>> call(String s) throws Exception {
+                System.out.println("---DEBUG 01---");
                 String[] tokens = s.split(",");
                 System.out.println(tokens[0] + "," + tokens[1] + "," + tokens[2]);
                 Integer time = new Integer(tokens[1]);
@@ -45,17 +46,23 @@ public class SecondarySortSpark {
 
         //生产环境禁用collect，因为影响性能，可在保存到文件中
         List<Tuple2<String, Tuple2<Integer, Integer>>> output = pairs.collect();
+        System.out.println("---DEBUG 02---");
         output.forEach((t) ->{
             Tuple2<Integer, Integer> timeValue = t._2();
-            System.out.println(t._1() + ", " + timeValue._1() + ","  + timeValue._1());
+            System.out.println(t._1 + ", " + timeValue._1 + ","  + timeValue._2);
         });
 
         //JavaPairRDD元素分组
         JavaPairRDD<String, Iterable<Tuple2<Integer, Integer>>> groups = pairs.groupByKey();
-        List<Tuple2<String, Tuple2<Integer, Integer>>> output2 = pairs.collect();
+        List<Tuple2<String, Iterable<Tuple2<Integer, Integer>>>> output2 = groups.collect();
+        System.out.println("---DEBUG group by key---");
         output2.forEach((t) ->{
-            Tuple2<Integer, Integer> timeValue = t._2();
-            System.out.println(t._1() + ", " + timeValue._1() + ","  + timeValue._1());
+            Iterable<Tuple2<Integer, Integer>> list = t._2();
+            System.out.println(t._1);
+            list.forEach((l) ->{
+                System.out.println(l._1 + "," + l._2);
+            });
+            System.out.println("===");
         });
 
         JavaPairRDD<String, Iterable<Tuple2<Integer, Integer>>> sorted = groups.mapValues(new Function<Iterable<Tuple2<Integer, Integer>>, Iterable<Tuple2<Integer, Integer>>>() {
@@ -67,7 +74,7 @@ public class SecondarySortSpark {
             }
         });
 
-        System.out.println("---DEBUG2---");
+        System.out.println("---DEBUG 03---");
         List<Tuple2<String, Iterable<Tuple2<Integer, Integer>>>> output3 = sorted.collect();
         output3.forEach((t) ->{
             Iterable<Tuple2<Integer, Integer>> list = t._2;
