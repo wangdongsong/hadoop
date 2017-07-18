@@ -22,16 +22,20 @@ public class PrimaryKeyTopNSpark {
 
         //Setp 1、2 验证输入参数
         if (args.length < 1){
-            System.err.println("Usage: SecondarySortSpark <file><topNum>");
+            System.err.println("Usage: SecondarySortSpark <file><topNum><direction:TOP|BOTTOM");
             System.exit(1);
         }
         String inputPath = args[0];
         System.out.println("args[0]: <file>=" + args[0]);
 
         //默认Top10
+        String direction = "TOP";
         int topN = 10;
         if (args[1] != null){
             topN = Integer.parseInt(args[1]);
+        }
+        if (args[2] != null && args[2].equalsIgnoreCase("BOTTOM")) {
+            direction = "BOTTOM";
         }
 
         //Step3 连接SparkMaster
@@ -40,6 +44,7 @@ public class PrimaryKeyTopNSpark {
 
         //设置TopN的参数，Broadcase可以广播，所有节点都可以收到
         final Broadcast<Integer> broadcastTopN = ctx.broadcast(topN);
+        final Broadcast<String> broadcastDirection = ctx.broadcast(direction);
 
         //Step4 读取源文件
         JavaRDD<String> lines = ctx.textFile(inputPath, 1);
@@ -68,9 +73,7 @@ public class PrimaryKeyTopNSpark {
                     Tuple2<String, Integer> tuple = tuple2Iterator.next();
                     top10.put(tuple._2, tuple._1);
                     //使用设置参数
-                    if (top10.size() > broadcastTopN.getValue()) {
-                        top10.remove(top10.firstKey());
-                    }
+                    setup(broadcastTopN, broadcastDirection, top10);
                 }
 
                 return Collections.singletonList(top10).iterator();
@@ -82,31 +85,15 @@ public class PrimaryKeyTopNSpark {
         SortedMap<Integer, String> finalTop10 = new TreeMap<>();
         List<SortedMap<Integer, String>> list = partitions.collect();
         list.forEach((l) ->{
-            l.entrySet().forEach((entry) ->{
-                finalTop10.put(entry.getKey(), entry.getValue());
-
-                if (finalTop10.size() > broadcastTopN.getValue()){
-                    finalTop10.remove(finalTop10.firstKey());
-                }
-            });
+            mergeMap(broadcastTopN, broadcastDirection, l, finalTop10);
         });
 
         //Step7的替换方案，使用JavaRDD.reduce
         SortedMap<Integer, String> finalTop10Reduce = partitions.reduce((m1, m2) -> {
             SortedMap<Integer, String> top10 = new TreeMap<>();
-            m1.entrySet().forEach((map) ->{
-                top10.put(map.getKey(), map.getValue());
-                if (top10.size() > broadcastTopN.getValue()){
-                    top10.remove(top10.firstKey());
-                }
-            });
+            mergeMap(broadcastTopN, broadcastDirection, m1, top10);
 
-            m2.entrySet().forEach((map) ->{
-                top10.put(map.getKey(), map.getValue());
-                if (top10.size() > broadcastTopN.getValue()){
-                    top10.remove(top10.firstKey());
-                }
-            });
+            mergeMap(broadcastTopN, broadcastDirection, m2, top10);
             return top10;
         });
 
@@ -119,6 +106,23 @@ public class PrimaryKeyTopNSpark {
             System.out.println(key + ", " + value);
         });
 
+    }
+
+    private static void mergeMap(Broadcast<Integer> broadcastTopN, Broadcast<String> broadcastDirection, SortedMap<Integer, String> m1, SortedMap<Integer, String> top10) {
+        m1.entrySet().forEach((map) ->{
+            top10.put(map.getKey(), map.getValue());
+            setup(broadcastTopN, broadcastDirection, top10);
+        });
+    }
+
+    private static void setup(Broadcast<Integer> broadcastTopN, Broadcast<String> broadcastDirection, SortedMap<Integer, String> top10) {
+        if (top10.size() > broadcastTopN.getValue()) {
+            if (broadcastDirection.getValue().equalsIgnoreCase("TOP")) {
+                top10.remove(top10.firstKey());
+            } else {
+                top10.remove(top10.lastKey());
+            }
+        }
     }
 
 }
