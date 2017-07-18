@@ -92,7 +92,6 @@ public class PrimaryKeyTopNSpark {
         SortedMap<Integer, String> finalTop10Reduce = partitions.reduce((m1, m2) -> {
             SortedMap<Integer, String> top10 = new TreeMap<>();
             mergeMap(broadcastTopN, broadcastDirection, m1, top10);
-
             mergeMap(broadcastTopN, broadcastDirection, m2, top10);
             return top10;
         });
@@ -108,9 +107,9 @@ public class PrimaryKeyTopNSpark {
 
     }
 
-    private static void mergeMap(Broadcast<Integer> broadcastTopN, Broadcast<String> broadcastDirection, SortedMap<Integer, String> m1, SortedMap<Integer, String> top10) {
-        m1.entrySet().forEach((map) ->{
-            top10.put(map.getKey(), map.getValue());
+    private static void mergeMap(Broadcast<Integer> broadcastTopN, Broadcast<String> broadcastDirection, SortedMap<Integer, String> map, SortedMap<Integer, String> top10) {
+        map.entrySet().forEach((m) ->{
+            top10.put(m.getKey(), m.getValue());
             setup(broadcastTopN, broadcastDirection, top10);
         });
     }
