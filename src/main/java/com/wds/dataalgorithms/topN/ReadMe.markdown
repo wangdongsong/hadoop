@@ -7,9 +7,9 @@
 
 * Spark Top 10解决方案：Key唯一，不使用Spark的排序函数例如top()或takeOrdered()——数据集：topN_primarykey.txt，PrimaryKeyTopNSpark  
 
-* Spark Top 10解决方案：Key不唯一，不使用Spark的排序函数例如top()或takeOrdered()
+* Spark Top 10解决方案：Key不唯一，不使用Spark的排序函数例如top()或takeOrdered()：NoUniqueTopNSpark
 
-* Spark Top 10解决方案：Key不唯一，使用Spark强大的排序函数takeOrdered()
+* Spark Top 10解决方案：Key不唯一，使用Spark强大的排序函数takeOrdered()：NoUniqueTopNTakeOrderSpark
 
 * MapReduce Top 10解决方案：Key不唯一
 
