@@ -1,5 +1,6 @@
 package com.wds.dataalgorithms.utils;
 
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 
 /**
@@ -17,5 +18,19 @@ public class SparkUtils {
         JavaSparkContext ctx = new JavaSparkContext(sparkMasterURL, applicationName);
         return ctx;
     }
+
+    public static JavaSparkContext createJavaSparkContext(String applicationName)
+            throws Exception {
+        SparkConf conf = new SparkConf().setAppName(applicationName);
+        JavaSparkContext ctx = new JavaSparkContext(conf);
+        return ctx;
+    }
+
+    public static String version() {
+        return "2.0.0";
+    }
+
+
+
 
 }
