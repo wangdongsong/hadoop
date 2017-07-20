@@ -56,6 +56,8 @@ public class NoUniqueTopNTakeOrderSpark {
         uniqueKeys.saveAsTextFile("/output/3");
 
         //takeOrdered and print result
+        //也可以使用top方法
+        //在比较器中增加负号，可实现Bottom N
         uniqueKeys.takeOrdered(N, (t1, t2) -> {
             return t1._1().compareTo(t2._1());
         }).forEach((entry) -> {
