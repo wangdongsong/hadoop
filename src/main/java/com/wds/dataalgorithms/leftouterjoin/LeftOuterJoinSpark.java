@@ -26,7 +26,7 @@ public class LeftOuterJoinSpark {
 
         //step4 为用户创建一个JavaRDD
         JavaRDD<String> users = ctx.textFile(usersInputFile, 1);
-        JavaPairRDD<String, Tuple2<String, String>> userRdd = users.mapToPair((string) ->{
+        JavaPairRDD<String, Tuple2<String, String>> userRDD = users.mapToPair((string) ->{
             String[] userRecord = string.split("\t");
             Tuple2<String, String> location = new Tuple2<>("L", userRecord[1]);
             return new Tuple2<String, Tuple2<String, String>>(userRecord[0], location);
@@ -39,6 +39,10 @@ public class LeftOuterJoinSpark {
             Tuple2<String, String> product = new Tuple2<>("P", transactionRecord[1]);
             return new Tuple2<String, Tuple2<String, String>>(transactionRecord[2], product);
         });
+
+        //step6 为step4和5生成的RDD创建一个并集
+        JavaPairRDD<String, Tuple2<String, String>> allRDD = transactionsRDD.union(userRDD);
+
 
     }
 }
