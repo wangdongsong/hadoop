@@ -6,6 +6,10 @@ import org.apache.spark.api.java.JavaSparkContext;
 import redis.clients.jedis.Tuple;
 import scala.Tuple2;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * Created by wangdongsong1229@163.com on 2017/7/25.
  */
@@ -42,6 +46,41 @@ public class LeftOuterJoinSpark {
 
         //step6 为step4和5生成的RDD创建一个并集
         JavaPairRDD<String, Tuple2<String, String>> allRDD = transactionsRDD.union(userRDD);
+
+        //step7 groupByKey创建RDD
+        JavaPairRDD<String, Iterable<Tuple2<String, String>>> groupedRDD = allRDD.groupByKey();
+
+        //step8 创建一个JavaPairRDD作为productLocationsRDD
+        JavaPairRDD<String, String> productLocationsRDD = groupedRDD.flatMapToPair((inputStr) -> {
+            String location = "UNKNOWN";
+            List<String> products = new ArrayList<String>();
+            for (Tuple2<String, String> t : inputStr._2) {
+                if (t._1().equalsIgnoreCase("L")) {
+                    location = t._2();
+                } else {
+                    products.add(t._2());
+                }
+            }
+
+            List<Tuple2<String, String>> kvList = new ArrayList<Tuple2<String, String>>();
+            for (String p : products){
+                kvList.add(new Tuple2<String, String>(p, location));
+            }
+
+            return kvList.iterator();
+        });
+
+
+        //step9 查找一个商品的所有地址
+        JavaPairRDD<String, Iterable<String>> productByLocations = productLocationsRDD.groupByKey();
+
+        //debug
+        List<Tuple2<String, Iterable<String>>> debug = productByLocations.collect();
+        System.out.println("-------debug begin--------");
+        debug.forEach((t) -> {
+            System.out.println("debug t._1 = " + t._1());
+            System.out.println("debug t._2 = " + t._2());
+        });
 
 
     }
