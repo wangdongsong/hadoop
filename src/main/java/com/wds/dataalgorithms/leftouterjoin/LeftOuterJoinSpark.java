@@ -6,9 +6,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import redis.clients.jedis.Tuple;
 import scala.Tuple2;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by wangdongsong1229@163.com on 2017/7/25.
@@ -82,6 +80,21 @@ public class LeftOuterJoinSpark {
             System.out.println("debug t._2 = " + t._2());
         });
 
+        //step10 改变值，对输出做最终处理
+        JavaPairRDD<String, Tuple2<Set<String>, Integer>> productByUniqueLocations = productByLocations.mapValues((iterable) -> {
+            Set<String> uniqueLocations = new HashSet<>();
+            for (String uniqueLocation : uniqueLocations) {
+                uniqueLocations.add(uniqueLocation);
+            }
+            return new Tuple2<Set<String>, Integer>(uniqueLocations, uniqueLocations.size());
+        });
 
+        //step11 最终输出
+        System.out.println("-----output-----");
+        List<Tuple2<String, Tuple2<Set<String>, Integer>>> output = productByUniqueLocations.collect();
+        output.forEach((t) -> {
+            System.out.println("output t._1 = " + t._1());
+            System.out.println("output t._2 = " + t._2());
+        });
     }
 }
