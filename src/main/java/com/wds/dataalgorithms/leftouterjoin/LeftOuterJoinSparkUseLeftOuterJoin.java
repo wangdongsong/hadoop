@@ -1,6 +1,9 @@
 package com.wds.dataalgorithms.leftouterjoin;
 
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import scala.Tuple2;
 
 /**
  * 使用LeftOuterJoin的Spark实现，MapReduce没有提供类似的方法
@@ -27,5 +30,26 @@ public class LeftOuterJoinSparkUseLeftOuterJoin {
 
         //step3 创建JavaSparkContext对象
         JavaSparkContext ctx = new JavaSparkContext();
+
+        //step4 为用户数据创建RDD
+        JavaRDD<String> users = ctx.textFile(usersInputFile, 1);
+
+        //step5 创建userRDD-右表
+        JavaPairRDD<String, String> usersRDD = users.mapToPair((s) -> {
+            String[] userRecord = s.split("\t");
+            return new Tuple2<String, String>(userRecord[0], userRecord[1]);
+        });
+
+        //step6 为交易数据创建一个RDD
+        JavaRDD<String> transactions = ctx.textFile(transactionsInputFile, 1);
+
+        //step7 创建transactionsRDD - 左表
+        JavaPairRDD<String, String> transactionsRDD = transactions.mapToPair((s) -> {
+            String[] transactionRecord = s.split("\t");
+            return new Tuple2<String, String>(transactionRecord[2], transactionRecord[1]);
+        });
+
+
+
     }
 }
