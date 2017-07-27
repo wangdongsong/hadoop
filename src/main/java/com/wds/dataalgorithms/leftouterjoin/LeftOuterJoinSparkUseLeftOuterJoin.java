@@ -65,6 +65,10 @@ public class LeftOuterJoinSparkUseLeftOuterJoin {
         });
         products.saveAsTextFile("/output/leftjoin/2");
 
+        //step10 按键完成分组(K = product, V = location)对的分组
+        JavaPairRDD<String, Iterable<String>> productByLocations = products.groupByKey();
+        productByLocations.saveAsTextFile("/output/leftjoin/3");
+
 
 
 
