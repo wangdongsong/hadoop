@@ -3,7 +3,12 @@ package com.wds.dataalgorithms.leftouterjoin;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.Optional;
+import scala.Option;
 import scala.Tuple2;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 使用LeftOuterJoin的Spark实现，MapReduce没有提供类似的方法
@@ -48,6 +53,18 @@ public class LeftOuterJoinSparkUseLeftOuterJoin {
             String[] transactionRecord = s.split("\t");
             return new Tuple2<String, String>(transactionRecord[2], transactionRecord[1]);
         });
+
+        //step8 使用内置leftOuterJoin方法
+        JavaPairRDD<String, Tuple2<String, Optional<String>>> joined = transactionsRDD.leftOuterJoin(usersRDD);
+        joined.saveAsTextFile("/output/leftjoin/1");
+
+        //step9 创建(product, location)对
+        JavaPairRDD<String, String> products = joined.mapToPair((t) -> {
+            Tuple2<String, Optional<String>> value = t._2();
+            return new Tuple2<>(value._1, value._2.get());
+        });
+        products.saveAsTextFile("/output/leftjoin/2");
+
 
 
 
