@@ -69,7 +69,15 @@ public class LeftOuterJoinSparkUseLeftOuterJoin {
         JavaPairRDD<String, Iterable<String>> productByLocations = products.groupByKey();
         productByLocations.saveAsTextFile("/output/leftjoin/3");
 
-
+        //setp11 创建最终输出
+        JavaPairRDD<String, Tuple2<Set<String>, Integer>> productByUniqueLocatoins = productByLocations.mapValues((iter) -> {
+            Set<String> uniqueLocations = new HashSet<String>();
+            iter.forEach((t) -> {
+                uniqueLocations.add(t);
+            });
+            return new Tuple2<>(uniqueLocations, uniqueLocations.size());
+        });
+        productByUniqueLocatoins.saveAsTextFile("/output/leftjoin/4");
 
 
     }
