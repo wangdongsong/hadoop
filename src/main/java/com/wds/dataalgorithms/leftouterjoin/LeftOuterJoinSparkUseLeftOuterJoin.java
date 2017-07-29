@@ -4,11 +4,14 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.Optional;
+import org.apache.spark.api.java.function.Function2;
 import scala.Option;
 import scala.Tuple2;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import org.apache.spark.api.java.function.Function;
 
 /**
  * 使用LeftOuterJoin的Spark实现，MapReduce没有提供类似的方法
@@ -80,5 +83,43 @@ public class LeftOuterJoinSparkUseLeftOuterJoin {
         productByUniqueLocatoins.saveAsTextFile("/output/leftjoin/4");
 
 
+        /*
+         * 合并步骤10和11
+         */
+        Function<String, Set<String>> createCombiner = new Function<String, Set<String>>() {
+            @Override
+            public Set<String> call(String s) {
+                Set<String> set = new HashSet<>();
+                set.add(s);
+                return set;
+            }
+        };
+
+        Function2<Set<String>, String, Set<String>> mergeValue = new Function2<Set<String>, String, Set<String>>() {
+            @Override
+            public Set<String> call(Set<String> v1, String v2) throws Exception {
+                v1.add(v2);
+                return v1;
+            }
+        };
+
+        Function2<Set<String>, Set<String>, Set<String>> mergeCombiners = new Function2<Set<String>, Set<String>, Set<String>>() {
+            @Override
+            public Set<String> call(Set<String> v1, Set<String> v2) throws Exception {
+                v1.addAll(v2);
+                return v1;
+            }
+        };
+
+        JavaPairRDD<String, Set<String>> productuniqueLocations2 = products.combineByKey(createCombiner,mergeValue, mergeCombiners);
+
+
+        //最终输出
+        Map<String, Set<String>> productMap = productuniqueLocations2.collectAsMap();
+        productMap.entrySet().forEach((entry) -> {
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+        });
     }
+
+
 }
