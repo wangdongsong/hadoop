@@ -15,9 +15,17 @@ import java.util.stream.Stream;
  */
 public class MBASpark {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         //step2 处理参数
+        if (args.length < 1) {
+            System.err.println("Usage: FindAssociationRules <Transactions>");
+            System.exit(0);
+        }
+        String transactionsFileName = args[0];
+        
         //step3 创建Spark上下文
+        JavaSparkContext cts = createJavaSparkContext();
+
         //step4 从HDFS读取所有交易并创建第一个RDD
         //step5 生成频繁模式(map阶段）
         //step6 组合/归约模式(reduce阶段）
