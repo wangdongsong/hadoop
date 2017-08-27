@@ -6,6 +6,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
+import scala.Tuple3;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,11 +43,72 @@ public class MBASpark {
             combinations.stream().filter((s) -> s.size() > 0).forEach(combList -> result.add(new Tuple2<List<String>, Integer>(combList, 1)));
             return result.iterator();
         });
-
         patterns.saveAsTextFile("/output/rules/ouput/2");
-        //step6 组合/归约模式(reduce阶段）
+
+        //step6 组合/归约模式(reduce阶段、reduceByKey()函数)
+        JavaPairRDD<List<String>, Integer> combined = patterns.reduceByKey((int1, int2) -> {
+            return int1 + int2;
+        });
+        combined.saveAsTextFile("/output/rules/output/3");
+
         //step7 生成所有子模式(map阶段2）
-        //step8 生成关联规则（reduce阶段2)
+        JavaPairRDD<List<String>, Tuple2<List<String>, Integer>> subpatterns = combined.flatMapToPair( (pattern) ->{
+
+            List<Tuple2<List<String>, Tuple2<List<String>, Integer>>> result = new ArrayList<Tuple2<List<String>, Tuple2<List<String>, Integer>>>();
+
+            List<String> list = pattern._1();
+            Integer frequency = pattern._2();
+            result.add(new Tuple2((list), new Tuple2<>((null), frequency)));
+
+            if (list.size() == 1) {
+                return result.iterator();
+            }
+
+            for (int i = 0; i < list.size(); i ++) {
+                List<String> sublist = removeOneItem(list, i);
+                result.add(new Tuple2(sublist, new Tuple2(list, frequency)));
+            }
+
+            return result.iterator();
+        });
+        subpatterns.saveAsTextFile("/output/rules/output/4");
+
+
+        //step8 生成关联规则（reduce阶段2)，使用Spark的groupByKey()方法
+        JavaPairRDD<List<String>, Iterable<Tuple2<List<String>, Integer>>> rules = subpatterns.groupByKey();
+        rules.saveAsTextFile("/output/rules/output/5");
+
+        //step9 生成关联规则
+        JavaRDD<List<Tuple3<List<String>, List<String>, Double>>> assocRules = rules.map( (in) -> {
+
+            List<Tuple3<List<String>, List<String>, Double>> result = new ArrayList<>();
+
+            List<String> fromList = in._1();
+            Iterable<Tuple2<List<String>, Integer>> to = in._2();
+            List<Tuple2<List<String>, Integer>> toList = new ArrayList<Tuple2<List<String>, Integer>>();
+            Tuple2<List<String>, Integer> fromCount = null;
+
+            for (Tuple2<List<String>, Integer> t2 : to) {
+                if (t2._1 == null) {
+                    fromCount = t2;
+                } else {
+                    toList.add(t2);
+                }
+            }
+
+            if (toList.isEmpty()) {
+                return result;
+            }
+
+            for (Tuple2<List<String>, Integer> t2 : toList) {
+                double confidence = (double) t2._2() / (double) fromCount._2();
+                List<String> t2List = new ArrayList<>(t2._1());
+                t2List.removeAll(fromList);
+                result.add(new Tuple3(fromList, t2List, confidence));
+            }
+            return result;
+        });
+        assocRules.saveAsTextFile("/output/rules/output6");
     }
 
     /**
