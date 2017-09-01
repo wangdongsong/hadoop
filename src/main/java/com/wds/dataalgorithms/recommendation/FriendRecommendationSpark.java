@@ -1,5 +1,8 @@
 package com.wds.dataalgorithms.recommendation;
 
+import org.apache.spark.api.java.JavaSparkContext;
+import scala.Tuple2;
+
 import java.util.List;
 import java.util.Map;
 
@@ -11,8 +14,14 @@ public class FriendRecommendationSpark {
 
     public static void main(String[] args) {
         //Step2 处理输入参数
+        if (args.length < 1) {
+            System.err.println("Usage: FriendRecommendationSpark <users and friends>");
+            System.exit(0);
+        }
+        String hdfsInputFile = args[0];
 
         //Step3 创建Spark上下文
+        JavaSparkContext ctx = new JavaSparkContext();
 
         //Step4 读文件并创建RDD
 
@@ -21,6 +30,8 @@ public class FriendRecommendationSpark {
         //Step6 实现reduce函数
 
         //Step7 生成所需要的最终输出
+
+        ctx.close();
     }
 
     /**
@@ -39,6 +50,14 @@ public class FriendRecommendationSpark {
             recommendations.append("),");
         });
         return recommendations.toString();
+    }
+
+    private static Tuple2<Long, Long> T2(long a, long b) {
+        return new Tuple2<>(a, b);
+    }
+
+    private static Tuple2<Long, Tuple2<Long, Long>> T2(long a, Tuple2<Long, Long> b) {
+        return new Tuple2<>(a, b);
     }
 
 }
