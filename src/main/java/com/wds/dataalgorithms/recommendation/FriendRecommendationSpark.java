@@ -1,5 +1,6 @@
 package com.wds.dataalgorithms.recommendation;
 
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
@@ -24,6 +25,11 @@ public class FriendRecommendationSpark {
         JavaSparkContext ctx = new JavaSparkContext();
 
         //Step4 读文件并创建RDD
+        JavaRDD<String> records = ctx.textFile(hdfsInputFile, 1);
+
+        //可使用如下代码调试
+        List<String> debug1 = records.collect();
+        debug1.forEach(System.out::println);
 
         //Step5 实现map函数
 
