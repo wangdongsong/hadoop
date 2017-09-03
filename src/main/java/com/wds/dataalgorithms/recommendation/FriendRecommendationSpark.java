@@ -5,9 +5,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 好友推荐
@@ -61,10 +59,41 @@ public class FriendRecommendationSpark {
 
             return mapperOutput.iterator();
         });
+        //Debug
+        pairs.collect().forEach((t2) ->{
+            System.out.println("debug2 key=" + t2._1() + "\t value=" + t2._2());
+        });
 
         //Step6 实现reduce函数
+        JavaPairRDD<Long, Iterable<Tuple2<Long, Long>>> grouped = pairs.groupByKey();
 
         //Step7 生成所需要的最终输出
+        JavaPairRDD<Long, String> recommendations = grouped.mapValues((values) ->{
+            //mutualFriends.key 推荐好友
+            //mutualFriends.value 共同好友列表
+            final Map<Long, List<Long>> mutualFriends = new HashMap<>();
+            for (Tuple2<Long, Long> t2 : values) {
+                final Long toUser = t2._1();
+                final Long mutualFriend = t2._2();
+                final boolean alreadyFriend = (mutualFriend == -1);
+
+                if (mutualFriends.containsKey(toUser)) {
+                    if (alreadyFriend) {
+                        mutualFriends.put(toUser, null);
+                    } else if (mutualFriends.get(toUser) != null) {
+                        mutualFriends.get(toUser).add(mutualFriend);
+                    }
+                } else {
+                    if (alreadyFriend) {
+                        mutualFriends.put(toUser, null);
+                    } else {
+                        List<Long> list1 = new ArrayList<>(Arrays.asList(mutualFriend));
+                        mutualFriends.put(toUser, list1);
+                    }
+                }
+            }
+            return buildRecommendations(mutualFriends);
+        });
 
         ctx.close();
     }
