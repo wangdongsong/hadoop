@@ -122,6 +122,13 @@ public class MovieRecommendationsWithJoinSpark {
         JavaPairRDD<Tuple2<String, String>, Tuple3<Double, Double, Double>> corr = corrRDD.mapValues((s) -> {
             return calculateCorrelations(s);
         });
+
+        //Step13 打印最终结果
+        corr.collect().forEach((t2) ->{
+            System.out.println("debug key=" + t2._1() + "\t value" + t2._2());
+        });
+
+        corr.saveAsTextFile("/output/movies/output");
     }
 
     static Tuple3<Double, Double, Double> calculateCorrelations(Iterable<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> values) {
