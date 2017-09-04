@@ -115,6 +115,64 @@ public class MovieRecommendationsWithJoinSpark {
             return new Tuple2<>(m1m2Key, t7);
         });
 
+        //Step11 电影对分组
+        JavaPairRDD<Tuple2<String, String>, Iterable<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>>> corrRDD = moviePairs.groupByKey();
+
+        //Step12 计算关联度
+        JavaPairRDD<Tuple2<String, String>, Tuple3<Double, Double, Double>> corr = corrRDD.mapValues((s) -> {
+            return calculateCorrelations(s);
+        });
+    }
+
+    static Tuple3<Double, Double, Double> calculateCorrelations(Iterable<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> values) {
+        int groupSize = 0;
+        int dotProduct = 0;
+        int rating1Sum = 0;
+        int rating2Sum = 0;
+        int rating1NormSq = 0;
+        int rating2NormSq = 0;
+        int maxNumOfumRaterS1 = 0;
+        int maxNumofumRaterS2 = 0;
+
+        for (Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> t7 : values) {
+            groupSize++;
+            dotProduct += t7._5();
+            rating1Sum += t7._1();
+            rating2Sum += t7._3();
+            rating1NormSq += t7._6();
+            rating2NormSq += t7._7();
+            int numOfRaterS1 = t7._2();
+            if (numOfRaterS1 > maxNumOfumRaterS1) {
+                maxNumOfumRaterS1 = numOfRaterS1;
+            }
+            int numOfRaterS2 = t7._4();
+            if (numOfRaterS2 > maxNumofumRaterS2) {
+                maxNumofumRaterS2 = numOfRaterS2;
+            }
+        }
+
+        double person = calculatePearsonCorrelations(groupSize, dotProduct, rating1Sum, rating2Sum, rating1NormSq, rating2NormSq);
+
+        double cosine = calculateCosineCorrelation(dotProduct, Math.sqrt(rating1NormSq), Math.sqrt(rating2NormSq));
+
+        double jaccard = calculateJaccardCorrelation(groupSize, maxNumOfumRaterS1, maxNumofumRaterS2);
+
+        return new Tuple3<Double, Double, Double>(person, cosine, jaccard);
+    }
+
+    private static double calculateJaccardCorrelation(int groupSize, int maxNumOfumRaterS1, int maxNumofumRaterS2) {
+        double union = maxNumOfumRaterS1 + maxNumofumRaterS2 - groupSize;
+        return groupSize / union;
+    }
+
+    private static double calculateCosineCorrelation(int dotProduct, double sqrt, double sqrt1) {
+        return dotProduct / (sqrt * sqrt1);
+    }
+
+    private static double calculatePearsonCorrelations(int groupSize, int dotProduct, int rating1Sum, int rating2Sum, int rating1NormSq, int rating2NormSq) {
+        double numerator = groupSize * dotProduct - rating1Sum * rating2Sum;
+        double denominator = Math.sqrt(groupSize * rating1NormSq - rating1Sum * rating1Sum) * Math.sqrt(groupSize * rating2NormSq - rating2Sum * rating2Sum);
+        return numerator / denominator;
     }
 
 }
