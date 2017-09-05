@@ -1,5 +1,12 @@
 package com.wds.dataalgorithms.markovspark;
 
+import com.wds.dataalgorithms.util.DateUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import scala.Tuple2;
+
 import java.io.Serializable;
 
 /**
@@ -16,6 +23,24 @@ public class MarkovSpark implements Serializable {
 
         final String inputPath = args[0];
         System.out.println("inputPath:args[0]=" + args[0]);
+
+        //Step2 创建上下文，并把输入转换为RDD
+        JavaSparkContext ctx = new JavaSparkContext();
+        JavaRDD<String> records = ctx.textFile(inputPath, 1);
+
+        //Step3 RDD转换为JavaPairRDD
+        JavaPairRDD<String, Tuple2<Long, Integer>> kv = records.mapToPair((rec) ->{
+            String[] tokens = StringUtils.split(rec, ",");
+            if (tokens.length != 4) {
+                return null;
+            }
+            long date = 0;
+            date = DateUtil.getDateAsMilliSeconds(tokens[2]);
+            int amout = Integer.parseInt(tokens[3]);
+            Tuple2<Long, Integer> v = new Tuple2<>(date, amout);
+            return new Tuple2<>(tokens[0], v);
+        });
+
 
     }
 
