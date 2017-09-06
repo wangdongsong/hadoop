@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Created by wangdongsong1229@163.com on 2017/9/4.
@@ -74,14 +76,47 @@ public class MarkovSpark implements Serializable {
 
             return mapperOutput.iterator();
         });
+
+        //组合/归约
+        JavaPairRDD<Tuple2<String, String>, Integer> markovModel1 = model1.reduceByKey((i1, i2) -> i1 + i2);
+
+        //Step7 最终输出
+        JavaRDD<String> markovModelFormatted = markovModel1.map((t) -> {
+            return t._1()._1() + ", " + t._1()._2() + ", " + t._2();
+        });
+
     }
 
-    private static <U> U toStateSequence(List<Tuple2<Long, Integer>> list) {
-        return null;
+    private static List<String> toStateSequence(List<Tuple2<Long, Integer>> list) {
+        if (list.size() < 2) {
+            return null;
+        }
+
+        List<String> stateSequence = new ArrayList<String>();
+        Tuple2<Long, Integer> prior = list.get(0);
+        for (int i = 1; i < list.size(); i++) {
+            Tuple2<Long,Integer> current = list.get(i);
+            //
+            long priorDate = prior._1;
+            long date = current._1;
+            // one day = 24*60*60*1000 = 86400000 milliseconds
+            long daysDiff = (date - priorDate) / 86400000;
+
+            int priorAmount = prior._2;
+            int amount = current._2;
+            //
+            String elapsedTime = getElapsedTime(daysDiff);
+            String amountRange = getAmountRange(priorAmount, amount);
+            //
+            String element = elapsedTime + amountRange;
+            stateSequence.add(element);
+            prior = current;
+        }
+        return stateSequence;
     }
 
     private static List<Tuple2<Long, Integer>> toList(Iterable<Tuple2<Long, Integer>> dateAndAmout) {
-        return null;
+        return StreamSupport.stream(dateAndAmout.spliterator(), false).collect(Collectors.toList());
     }
 
     static class TupleComparatorAscending implements Comparator<Tuple2<Long, Integer>>, Serializable {
@@ -90,6 +125,26 @@ public class MarkovSpark implements Serializable {
         public int compare(Tuple2<Long, Integer> t1, Tuple2<Long, Integer> t2) {
             // return -t1._1.compareTo(t2._1);     // sorts RDD elements descending
             return t1._1.compareTo(t2._1);         // sorts RDD elements ascending
+        }
+    }
+
+    static String getElapsedTime(long daysDiff) {
+        if (daysDiff < 30) {
+            return "S"; // small
+        } else if (daysDiff < 60) {
+            return "M"; // medium
+        } else {
+            return "L"; // large
+        }
+    }
+
+    static String getAmountRange(int priorAmount, int amount) {
+        if (priorAmount < 0.9 * amount) {
+            return "L"; // significantly less than
+        } else if (priorAmount < 1.1 * amount) {
+            return "E"; // more or less same
+        } else {
+            return "G"; // significantly greater than
         }
     }
 
