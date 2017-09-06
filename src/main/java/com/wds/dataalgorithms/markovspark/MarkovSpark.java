@@ -8,6 +8,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -54,6 +55,24 @@ public class MarkovSpark implements Serializable {
             List<Tuple2<Long, Integer>> list = toList(dateAndAmout);
             Collections.sort(list, TupleComparatorAscending.INSTANCE);
             return toStateSequence(list);
+        });
+
+        //Step6 生成马尔可夫状态转移矩阵
+        JavaPairRDD<Tuple2<String, String>, Integer> model1 = stateSequence.flatMapToPair(stringListTuple2 -> {
+            List<String> states = stringListTuple2._2();
+            if ((states == null) || (states.size() < 2)) {
+                return Collections.emptyIterator();
+            }
+
+            List<Tuple2<Tuple2<String, String>, Integer>> mapperOutput = new ArrayList<Tuple2<Tuple2<String, String>, Integer>>();
+            for (int i = 0; i < (states.size() -1); i++) {
+                String fromState = states.get(i);
+                String toState = states.get(i + 1);
+                Tuple2<String, String> k = new Tuple2<>(fromState, toState);
+                mapperOutput.add(new Tuple2<Tuple2<String, String>, Integer>(k, 1));
+            }
+
+            return mapperOutput.iterator();
         });
     }
 
