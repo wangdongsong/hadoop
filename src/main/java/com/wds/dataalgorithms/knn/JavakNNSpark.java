@@ -60,5 +60,33 @@ public class JavakNNSpark {
         return StreamSupport.stream(splitter.split(str).spliterator(), false).map(Double::parseDouble).collect(Collectors.toList());
     }
 
+    /**
+     * 接受两个向量R和S，计算它们之间的欧氏距离
+     *
+     * @param rAsString
+     * @param sAsString
+     * @param d
+     * @return
+     */
+    private static double calculateDistance(String rAsString, String sAsString, int d) {
+        List<Double> r = splitOnToListOfDouble(rAsString, ",");
+        List<Double> s = splitOnToListOfDouble(sAsString, ",");
+        if (r.size() != d) {
+            return Double.NaN;
+        }
+
+        if (s.size() != d) {
+            return Double.NaN;
+        }
+
+        double sum = 0.0;
+        for (int i = 0; i < d; i++) {
+            double difference = r.get(i) - s.get(i);
+            sum += difference * difference;
+        }
+        return Math.sqrt(sum);
+
+    }
+
 }
 
