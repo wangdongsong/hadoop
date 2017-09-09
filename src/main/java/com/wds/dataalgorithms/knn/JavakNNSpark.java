@@ -3,10 +3,12 @@ package com.wds.dataalgorithms.knn;
 import com.google.common.base.Splitter;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import scala.Tuple2;
 
 import javax.xml.parsers.SAXParser;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -86,6 +88,71 @@ public class JavakNNSpark {
         }
         return Math.sqrt(sum);
 
+    }
+
+    /**
+     * 给定{(distance, classification)}，会根据这个距离找出k个近邻
+     * @param neighbors
+     * @param k
+     * @return
+     */
+    private static SortedMap<Double, String> findNearestK(Iterable<Tuple2<Double, String>> neighbors, int k) {
+        //只保留k个邻近
+        SortedMap<Double, String> nearestK = new TreeMap<>();
+        for (Tuple2<Double, String> neighbor : neighbors) {
+            Double distance = neighbor._1();
+            String classificationID = neighbor._2();
+
+            nearestK.put(distance, classificationID);
+            if (nearestK.size() > k) {
+                nearestK.remove(nearestK.lastKey());
+            }
+
+        }
+        return nearestK;
+    }
+
+    /**
+     * 统计分类的简单方法（根据多数计数选择分类）
+     * @param nearestK
+     * @return
+     */
+    private static Map<String, Integer> buildClassificationCount(Map<Double, String> nearestK) {
+        Map<String, Integer> majority = new HashMap<String, Integer>();
+        for (Map.Entry<Double, String> entry : nearestK.entrySet()) {
+            String classificationID = entry.getValue();
+            Integer count = majority.get(classificationID);
+            if (count == null) {
+                majority.put(classificationID, 1);
+            } else {
+                majority.put(classificationID, count + 1);
+            }
+        }
+        return majority;
+    }
+
+    /**
+     * 根据多数原则选择分类， 对一个给定的查询点r，如果k = 6，则分类为{C1， C2， C3， C4， C5， C6}
+     * @param majority
+     * @return
+     */
+    private static String classifyByMajority(Map<String, Integer> majority) {
+        int votes = 0;
+        String selectedClassification = null;
+        for (Map.Entry<String, Integer> entry : majority.entrySet()) {
+            if (selectedClassification == null) {
+                selectedClassification = entry.getKey();
+                votes = entry.getValue();
+            } else {
+                int count = entry.getValue();
+                if (count > votes) {
+                    selectedClassification = entry.getKey();
+                    votes = count;
+                }
+            }
+        }
+
+        return selectedClassification;
     }
 
 }
