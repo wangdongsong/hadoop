@@ -5,6 +5,8 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.broadcast.Broadcast;
 import scala.Tuple2;
 
@@ -67,7 +69,7 @@ public class JavakNNSpark {
             return new Tuple2<String, Tuple2<Double, String>>(K, V);
         });
         knnMapped.saveAsTextFile("/output/knn/knnMapped");
-        
+
         //Step8 按R中的r对距离分组
         JavaPairRDD<String, Iterable<Tuple2<Double, String>>> knnGrouped = knnMapped.groupByKey();
 
@@ -81,7 +83,37 @@ public class JavakNNSpark {
             return selectedClassification;
         });
         knnOutput.saveAsTextFile("/output/knn/knnOutput");
+
+        /**
+         * 合并8、9步
+         */
+        knnOutput = knnMapped.combineByKey(createCombiner, mergeValue, mergeCombiners);
     }
+
+    static Function<Tuple2<Double, String>, String> createCombiner = new Function<Tuple2<Double, String>, String>(){
+
+        @Override
+        public String call(Tuple2<Double, String> v1) throws Exception {
+            //TODO
+            return null;
+        }
+    };
+
+    static Function2<String, Tuple2<Double, String>, String> mergeValue = new Function2<String, Tuple2<Double, String>, String>() {
+        @Override
+        public String call(String v1, Tuple2<Double, String> v2) throws Exception {
+            //TODO
+            return null;
+        }
+    };
+
+    static Function2<String, String, String> mergeCombiners = new Function2<String, String, String>() {
+        @Override
+        public String call(String v1, String v2) throws Exception {
+            //TODO
+            return null;
+        }
+    };
 
     /**
      * 创建Spark上下文
