@@ -36,7 +36,7 @@ public class JavakNNSpark {
 
         //Step4 广播共享对象
         //为了能够从集群节点访问共享对象和数据结构，可以使用Broadcast类。
-        final Broadcast<Integer> boardcaseK = ctx.broadcast(k);
+        final Broadcast<Integer> broadcastK = ctx.broadcast(k);
         final Broadcast<Integer> broadcastD = ctx.broadcast(d);
 
         //Step5 对查询和训练数据集创建RDD
@@ -66,10 +66,21 @@ public class JavakNNSpark {
             Tuple2<Double, String> V = new Tuple2<>(distance, sClassificationID);
             return new Tuple2<String, Tuple2<Double, String>>(K, V);
         });
-
+        knnMapped.saveAsTextFile("/output/knn/knnMapped");
+        
         //Step8 按R中的r对距离分组
+        JavaPairRDD<String, Iterable<Tuple2<Double, String>>> knnGrouped = knnMapped.groupByKey();
 
         //Step9 找出k个近邻并对r分类
+        JavaPairRDD<String, String> knnOutput = knnGrouped.mapValues((neighbors) -> {
+            Integer k1 = broadcastK.getValue();
+            SortedMap<Double, String> nearestK = findNearestK(neighbors, k);
+            Map<String, Integer> majority = buildClassificationCount(nearestK);
+
+            String selectedClassification = classifyByMajority(majority);
+            return selectedClassification;
+        });
+        knnOutput.saveAsTextFile("/output/knn/knnOutput");
     }
 
     /**
