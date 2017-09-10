@@ -2,7 +2,10 @@ package com.wds.dataalgorithms.knn;
 
 import com.google.common.base.Splitter;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.broadcast.Broadcast;
 import scala.Tuple2;
 
 import javax.xml.parsers.SAXParser;
@@ -17,18 +20,52 @@ import java.util.stream.StreamSupport;
  */
 public class JavakNNSpark {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         //Step2 处理输入参数
+        if (args.length < 4) {
+            System.err.println("Usage: kNN <k-knn> <d-dimension> <R> <S>");
+            System.exit(0);
+        }
+        Integer k = Integer.valueOf(args[0]);
+        Integer d = Integer.valueOf(args[1]);
+        String dataSetR = args[2];
+        String dataSetS = args[3];
 
         //Step3 创建上下文
+        JavaSparkContext ctx = createJavaSparkContext();
 
         //Step4 广播共享对象
+        //为了能够从集群节点访问共享对象和数据结构，可以使用Broadcast类。
+        final Broadcast<Integer> boardcaseK = ctx.broadcast(k);
+        final Broadcast<Integer> broadcastD = ctx.broadcast(d);
 
         //Step5 对查询和训练数据集创建RDD
+        JavaRDD<String> R = ctx.textFile(dataSetR, 1);
+        R.saveAsTextFile("/output/knn/output/R");
+
+        JavaRDD<String> S = ctx.textFile(dataSetS, 1);
+        S.saveAsTextFile("/output/knn/output/S");
 
         //Step6 计算（R，S）的笛卡尔积
+        JavaPairRDD<String, String> cart = R.cartesian(S);
+        cart.saveAsTextFile("/output/knn/output/cart");
 
         //Step7 找出R中的r与S中的s之间的距离distance(r, s）
+        JavaPairRDD<String, Tuple2<Double, String>> knnMapped = cart.mapToPair((cartRecord) -> {
+            String rRecord = cartRecord._1();
+            String sRecord = cartRecord._2();
+            String[] rTokens = rRecord.split(";");
+            String rRecordID = rTokens[0];
+            String r = rTokens[1];
+            String[] sTokens = sRecord.split(";");
+            String sClassificationID = sTokens[1];
+            String s = sTokens[2];
+            Integer d1 = broadcastD.value();
+            double distance = calculateDistance(r, s, d1);
+            String K = rRecordID;
+            Tuple2<Double, String> V = new Tuple2<>(distance, sClassificationID);
+            return new Tuple2<String, Tuple2<Double, String>>(K, V);
+        });
 
         //Step8 按R中的r对距离分组
 
