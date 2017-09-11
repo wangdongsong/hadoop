@@ -6,6 +6,7 @@ import scala.Tuple2;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 贝叶斯
@@ -18,8 +19,10 @@ public class JavaNBCSpark {
     }
 
     private static List<Tuple2<PairOfStrings, DoubleWritable>> toWritableList(Map<Tuple2<String, String>, Double> PT){
-
-        return null;
+        return  PT.entrySet().stream().map((entry) ->{
+            return  new Tuple2<PairOfStrings, DoubleWritable>(new PairOfStrings(entry.getKey()._1(), entry.getKey()._2()), new DoubleWritable(entry.getValue()));
+        }).collect(Collectors.toList());
+        //return null;
     }
 
 
