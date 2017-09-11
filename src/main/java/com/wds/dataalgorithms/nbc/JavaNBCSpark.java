@@ -15,6 +15,25 @@ import java.util.stream.Collectors;
 public class JavaNBCSpark {
 
     public static void main(String[] args) {
+        //Step2 处理输入参数
+
+        //Step3 创建一个Spark上下文对象
+
+        //Step4 读取训练数据
+
+        //Step5 对训练数据的所有元素实现map函数
+
+        //Step6 对训练数据的所有元素实现reduce函数
+
+        //Step7  收集归约数据为Map
+
+        //Step8 建立分类器
+
+        //Step9 保存分类器
+
+        //Step9.1 用于对新记录分类的PT（概率表）
+
+        //Step9.2 分类列表
 
     }
 
