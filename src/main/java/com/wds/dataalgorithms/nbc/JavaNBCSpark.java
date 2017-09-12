@@ -8,13 +8,15 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * 贝叶斯
+ * 贝叶斯 阶段1 使用符号训练数据建立分类器
  * Created by wangdongsong1229@163.com on 2017/9/10.
  */
 public class JavaNBCSpark {
@@ -27,12 +29,14 @@ public class JavaNBCSpark {
         }
         final String trainingDataFilename = args[0];
 
+
         //Step3 创建一个Spark上下文对象
         JavaSparkContext ctx = SparkUtil.createJavaSparkContext("java nbc");
 
         //Step4 读取训练数据
         JavaRDD<String> training = ctx.textFile(trainingDataFilename, 1);
         training.saveAsTextFile("/output/javaNBCSpark/output1");
+        long trainingDataSize = training.count();
 
         //Step5 对训练数据的所有元素实现map函数
         JavaPairRDD<Tuple2<String, String>, Integer> pairs = training.flatMapToPair((rec) ->{
@@ -54,8 +58,28 @@ public class JavaNBCSpark {
         counts.saveAsTextFile("/output/javaNBCSpark/output/3");
 
         //Step7  收集归约数据为Map
+        Map<Tuple2<String, String>, Integer> countsAsMap = counts.collectAsMap();
 
         //Step8 建立分类器
+        Map<Tuple2<String, String>, Double> PT = new HashMap<Tuple2<String, String>, Double>();
+        List<String> CLASSIFICATIONS = new ArrayList<String>();
+        for (Map.Entry<Tuple2<String, String>, Integer> entry : countsAsMap.entrySet()) {
+            Tuple2<String, String> k = entry.getKey();
+            String classification = k._2();
+            if (k._1().equals("CLASS")) {
+                PT.put(k, ((double) entry.getValue()) / ((double) trainingDataSize));
+                CLASSIFICATIONS.add(k._2());
+            } else {
+                Tuple2<String, String> k2 = new Tuple2<>("CLASS", classification);
+                Integer count = countsAsMap.get(k2);
+                if (count == null) {
+                    PT.put(k, 0.0);
+                } else {
+                    PT.put(k, ((double) entry.getValue()) / ((double) count.intValue()));
+                }
+            }
+        }
+        System.out.println("PT=" + PT);
 
         //Step9 保存分类器
 
