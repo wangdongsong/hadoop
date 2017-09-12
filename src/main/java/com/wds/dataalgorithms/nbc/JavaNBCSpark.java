@@ -1,7 +1,9 @@
 package com.wds.dataalgorithms.nbc;
 
+import com.wds.dataalgorithms.util.SparkUtil;
 import edu.umd.cloud9.io.pair.PairOfStrings;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class JavaNBCSpark {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         //Step2 处理输入参数
         if (args.length < 1) {
             System.err.println("Usage:JavaNBCSpark <training-data-filename>");
@@ -23,6 +25,7 @@ public class JavaNBCSpark {
         final String trainingDataFilename = args[0];
 
         //Step3 创建一个Spark上下文对象
+        JavaSparkContext ctx = SparkUtil.createJavaSparkContext("java nbc");
 
         //Step4 读取训练数据
 
