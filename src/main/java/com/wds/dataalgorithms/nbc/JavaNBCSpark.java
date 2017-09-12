@@ -16,6 +16,11 @@ public class JavaNBCSpark {
 
     public static void main(String[] args) {
         //Step2 处理输入参数
+        if (args.length < 1) {
+            System.err.println("Usage:JavaNBCSpark <training-data-filename>");
+            System.exit(1);
+        }
+        final String trainingDataFilename = args[0];
 
         //Step3 创建一个Spark上下文对象
 
