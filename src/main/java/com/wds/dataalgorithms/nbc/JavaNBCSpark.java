@@ -83,13 +83,14 @@ public class JavaNBCSpark {
         System.out.println("PT=" + PT);
 
         //Step9 保存分类器
+        //Step9.1 用于对新记录分类的PT（概率表）
         List<Tuple2<PairOfStrings, DoubleWritable>> list = toWritableList(PT);
         JavaPairRDD<PairOfStrings, DoubleWritable> ptRDD = ctx.parallelizePairs(list);
         ptRDD.saveAsHadoopFile("/output/javaNBCSpark/output/naivebayes/pt", PairOfStrings.class, DoubleWritable.class, SequenceFileOutputFormat.class);
 
-        //Step9.1 用于对新记录分类的PT（概率表）
-
         //Step9.2 分类列表
+        JavaRDD<String> classificationsRDD = ctx.parallelize(CLASSIFICATIONS);
+        classificationsRDD.saveAsTextFile("/output/javaNBCSpark/output/naivebayes/classes");
 
     }
 
