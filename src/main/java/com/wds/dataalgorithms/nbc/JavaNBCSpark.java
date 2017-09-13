@@ -3,6 +3,7 @@ package com.wds.dataalgorithms.nbc;
 import com.wds.dataalgorithms.util.SparkUtil;
 import edu.umd.cloud9.io.pair.PairOfStrings;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -82,6 +83,9 @@ public class JavaNBCSpark {
         System.out.println("PT=" + PT);
 
         //Step9 保存分类器
+        List<Tuple2<PairOfStrings, DoubleWritable>> list = toWritableList(PT);
+        JavaPairRDD<PairOfStrings, DoubleWritable> ptRDD = ctx.parallelizePairs(list);
+        ptRDD.saveAsHadoopFile("/output/javaNBCSpark/output/naivebayes/pt", PairOfStrings.class, DoubleWritable.class, SequenceFileOutputFormat.class);
 
         //Step9.1 用于对新记录分类的PT（概率表）
 
